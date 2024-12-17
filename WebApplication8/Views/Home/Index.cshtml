@@ -1,0 +1,1298 @@
+﻿@model IEnumerable<WebApplication8.Models.Registration>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<h2>Student</h2>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+
+<style>
+    .custwhite {
+        color: white;
+    }
+
+    body {
+        overflow: auto !important;
+        position: relative;
+    }
+</style>
+
+
+@Html.ValidationSummary(true)
+
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<script src="~/Scripts/bootstrap.min.js"></script>
+
+<!-- Button trigger modal -->
+<div id="insertMessage">
+
+</div>
+<div id="editMessage">
+
+</div>
+<div id="deleteMessage">
+
+</div>
+<button type="button" onclick="clearTextBox()" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+    Add Student
+</button>&nbsp;&nbsp;&nbsp;&nbsp;
+
+<input type="hidden" id="getbyID" />
+
+<div class="row">
+    <div class="col-9">
+        <div class="d-flex pt-2">
+            <div>
+                <h6>Plaese Select Number:</h6>
+            </div>
+            <div class="ms-3 mb-6 row">
+                <select id="pageSizeDropdown" class="border-1 border-primary rounded-2 row-cols-lg-4">
+                    <option value="5">5</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="-1">All</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="pb-4 col-3">
+        <div class=" d-flex mb-2 ">
+            <input type="text" id="searchfield" class="form-control border-dark shadow-sm" placeholder="Search" />
+            <input type="submit" class="ms-2 rounded border-primary btn-light btn" value="Search" onclick="loadData(pageSize, pageNumber) " />
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="d-flex align-items-center gap-3 justify-content-between mb-2">
+    <div class="d-flex flex-column align-items-center gap-3">
+        <div class="form-group">
+            <label for="exportFormat">Choose Export Format:</label>
+            <div id="exportFormat" class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-outline-primary ">
+                    <input type="radio" name="exportFormat" id="excelFormat" value="excel" autocomplete="off" checked> Excel
+                </label>
+                <label class="btn btn-outline-primary">
+                    <input type="radio" name="exportFormat" id="csvFormat" value="csv" autocomplete="off"> CSV
+                </label>
+            </div>
+        </div>
+        <div class="" style="margin: 0px 0px 0px 85px">
+            <button id="exportButton" class="btn ms-4 btn-success">Export</button>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column align-items-center justify-content-center gap-3  ">
+        <div class="d-flex gap-2" >
+            <h4 class="mb-0">Import File</h4>
+
+            <div class="">
+                <input type="file" id="UploadField" name="file" class="form-control" style="width:300px"  />
+                <span id="excelSpan" class="text-danger visually-hidden">Please Select File</span>
+            </div>
+        </div>
+        <div class="d-flex  ">
+            @*<button type="button" class="btn btn-secondary" id="Clear" onclick="clearTextBox()">Clear</button>*@
+            <button type="submit" id="uploadExcelButton" onclick="uploadExcelFile()" class="btn btn-info " style="margin-right: 25px">
+                <i class="bi bi-cloud-arrow-down-fill"></i> Upload
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+
+<table id="studentTable" class="table table-bordered table-hover table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>sr no</th>
+            <th>BookingId</th>
+            <th>Full Name</th>
+            <th>BookingType</th>
+            <th>Category</th>
+            <th>SubCategory</th>
+            <th>BookingDate</th>
+            <th>Status</th>
+            <th>Description</th>
+            <th>Images</th>
+            <th>Pdf</th>
+            <th>CreatedDate</th>
+            <th>UpdatedDate </th>
+            <th>Operation</th>
+
+        </tr>
+    </thead>
+    <tbody class="tbody">
+    </tbody>
+
+</table>
+
+
+<div id="pagination-container">
+    <ul class="pagination">
+        <!-- Pagination links will be dynamically generated here -->
+    </ul>
+</div>
+
+
+<div id="page-info"></div>
+
+
+
+
+
+<!-- CREATE and UPDATE Modal -->
+
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Admission</h5>
+                <button type="button" onclick="clearTextBox()" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="mx-3 my-3">
+                    <div class="form-group">
+                        <label for="RegID" hidden="hidden">RegID</label>
+                        <input type="text" class="form-control" id="RegId" placeholder="RegID" disabled="disabled" hidden="hidden" />
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <span class="text-danger">*</span>
+                                <label for="FullName" class="fw-bold">Full Name</label>
+                                <input type="text" class="form-control" id="FullName" placeholder="Full Name" onkeydown="validationFieldOnChangeFullName()" />
+                                <span id="fullName" class="visually-hidden text-danger"> please enter full name</span>
+                                @*<div class="error" id="FullNameError"></div>*@
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <span class="fw-bold ">BookingType :</span><br />
+                                <input type="radio" id="Obc" name="BookingType" value="Obc" onchange="validateBookingType()">
+                                <label for="Obc">Obc</label>
+                                <input type="radio" id="General" name="BookingType" value="General" onchange="validateBookingType()">
+                                <label for="General">General</label>
+                                <span id="GenderError" class="text-danger"></span>
+                                <div id="BookingType">
+
+                                </div>
+                                <span id="bookingtypess" class="visually-hidden "> please choose types</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group d-flex gap-4 my-3 @*align-items-center*@">
+                            <div class="col-md-6">
+                                <span class="text-danger">*</span>
+                                <label class="control-label fw-bold align-items-center "> Category :</label>
+                                <select id="country" name="Category" class="form-control " onchange="validationFieldOnChangeCategory()">
+                                </select>
+                                <span id="categoryss" class="visually-hidden text-danger"> please enter Category</span>
+
+                            </div>
+                            <div class="col-md-6 " style="margin-left:-10px;">
+                                <label class="control-label fw-bold align-items-center "> SubCategory : </label><br />
+                                <select id="state" name="SubCategory" class="form-control" onchange="validationFieldOnChangeSubCategory()">
+                                </select>
+                                <span id="subcategoryss" class="visually-hidden text-danger"> please enter SubCategory</span>
+                            </div>
+                            <span id="valCountryAndState" class="text-danger" style="display:none">Please Select Country And State</span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <span class="text-danger">*</span>
+                                <label for="BookingDate" class="fw-bold">Booking Date</label>
+                                <input type="date" class="form-control" id="BookingDate" name="BookingDate" onchange="validationFieldOnChangeBookingDate()" />
+                                <span id="bookingsdate" class="visually-hidden text-danger"> please enter Booking Date</span>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Status"> Status </label><br>
+                                <input type="checkbox" id="Status" name="Status" value="Status">
+                                <div class="error" id="StatusError"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <span class="text-danger">*</span>
+                                <label for="Image" class="fw-bold">Images</label>
+                                <input type="file" class="form-control" name="Image" id="Image" onchange="validationFieldOnChangeImage()" />
+                                <div id="imagePreview">      </div>
+                                <button type="button" id="ImgRMbtn" onclick="DELIMG()">Remove</button>
+                                <img src="" id="imPre" width="100">
+                                <span id="images" class="visually-hidden text-danger"> choose image</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="Pdf" class="fw-bold">Pdf</label>
+                                <input type="file" class="form-control" name="Pdf" id="Pdf" onchange="validationFieldOnChangePdf()" />
+                                <div id="pdfPreview"></div>
+                                <button type="button" id="PdfRMbtn" onclick="DELPDF()">Remove</button>
+                                <span id="pdfs" class="visually-hidden text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="Description" class="fw-bold">Description</label>
+                            <textarea type="text" class="form-control" id="Description" placeholder="Description" onchange="validationFieldOnChangeDescription()" name="Description" required></textarea>
+                            <span id="deescription" class="visually-hidden"> please enter Description </span>
+
+                        </div>
+                    </div>
+
+
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnAdd" onclick="AddStudent()">Add</button>
+                <button type="button" class="btn btn-primary" id="btnUpdate" style="display:none;" onclick="UpdateStudent()" data-bs-dismiss="modal">Update</button>
+                <button type="button" class="btn btn-secondary" id="Closed" data-bs-dismiss="modal" onclick="clearTextBox()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Student</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h3> Are You Sure? You Want To Delete This.</h3>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnDelete" onclick="DeleteStudent()">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script type="text/javascript">
+
+
+
+    $(document).ready(function () {
+        loadData();
+
+        $('#studentForm').submit(function () {
+            var isValid = true;
+            var countstate = document.getElementById("valCountryAndState")
+            // Example: check if file inputs are not empty
+            if ($('#country').val() == '') {
+                isValid = false;
+                countstate.style.display = "block";
+            }
+            else {
+                countstate.style.display = "none";
+                return isValid;
+            }
+            return isValid;
+
+
+
+
+        });
+
+
+
+
+
+
+        //--------------------Category  ---------------------------
+
+        $.ajax({
+            url: '/Home/Create',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var mtd = data.Countries;
+                var Country = $('#country');
+                Country.empty();
+                //console.log(mtd);
+                Country.append($('<option>').text('- Select Category -').attr('value', ''));
+                $.each(mtd, function (index, CountryName) {
+                    Country.append($('<option>').text(CountryName.CName).attr('value', CountryName.Cid));
+
+                    //console.log(CountryName);
+                });
+            },
+            error: function () {
+                alert('Error loading Country.');
+            }
+
+        });
+        $.ajax({
+            url: '/Home/Create',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var md = data.States;
+                var State = $('#state');
+                State.prop('disabled', true);
+                State.empty();
+                State.append($('<option>').text('- Select SubCategory -').attr('value', ''));
+                $.each(md, function (index, stateName) {
+                    State.append($('<option>').text(stateName.Sname).attr('value', stateName.Sid).attr('data-country', stateName.Counid));
+                    //console.log(State);
+                });
+            },
+            error: function () {
+                alert('Error loading State.');
+            }
+        });
+
+
+        document.getElementById("country").addEventListener("change", function () {
+            var countryId = this.value;
+            var countrySelect = document.getElementById("country");
+            var stateSelect = document.getElementById("state");
+            var stateOptions = stateSelect.getElementsByTagName("option");
+
+            var stateName = this.options[this.selectedIndex].text;
+            //debugger;
+            if (countryId) {
+                stateSelect.disabled = false;
+                stateSelect.value = "- Select Category -";
+                for (var i = 0; i < stateOptions.length; i++) {
+                    var option = stateOptions[i];
+                    if (option.value == 0) {
+                        option.style.display = 'block';
+                        option.disabled = false;
+                    } else if (option.getAttribute("data-country") === countryId) {
+                        option.style.display = 'block';
+                        option.disabled = false;
+                    } else {
+                        option.style.display = 'none';
+                        option.disabled = true;
+                    }
+                }
+                stateSelect.value = "";
+            } else {
+                stateSelect.disabled = true;
+
+
+                $.ajax({
+                    url: '/Home/Create',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var md = data.States;
+                        var State = $('#state');
+                        //State.prop('disabled', false);
+                        State.empty();
+                        State.append($('<option>').text('- Select SubCategory -').attr('value', ''));
+                        $.each(md, function (index, stateName) {
+                            State.append($('<option>').text(stateName.Sname).attr('value', stateName.Sid).attr('data-country', stateName.Counid));
+                            //console.log(State);
+                        });
+                    },
+                    error: function () {
+                        alert('Error loading State.');
+                    }
+                });
+            }
+        });
+
+
+
+    });
+
+
+    function subcategory() {
+        $.ajax({
+            url: '/Home/Create',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var md = data.States;
+                var State = $('#state');
+                //State.prop('disabled', false);
+                State.empty();
+                State.append($('<option>').text('- Select SubCategory -').attr('value', ''));
+                $.each(md, function (index, stateName) {
+                    State.append($('<option>').text(stateName.Sname).attr('value', stateName.Sid).attr('data-country', stateName.Counid));
+                    //console.log(State);
+                });
+            },
+            error: function () {
+                alert('Error loading State.');
+            }
+        });
+    }
+
+    var pageSize = 5;
+    var pageNumber = 1;
+
+    loadData(pageSize, pageNumber);
+
+    $('#pageSizeDropdown').on('change', function () {
+        pageSize = $(this).val();
+        if (pageSize == '-1') {
+            pageSize = 999999999;
+        }
+        pageNumber = 1; // reset to first page
+        loadData(pageSize, pageNumber);
+    });
+
+    $('#prev-page').click(function () {
+        debugger;
+        if (pageNumber > 1) {
+            pageNumber--;
+            loadData(pageSize, pageNumber);
+        }
+    });
+
+    $('#next-page').click(function () {
+        debugger;
+        var totalPages = $('#page-info').data('totalPages');
+        if (pageNumber < totalPages) {
+            pageNumber++;
+            loadData(pageSize, pageNumber);
+        }
+    });
+
+    function NextPage() {
+        debugger;
+        var totalPages = $('#page-info').data('totalPages');
+        if (pageNumber < totalPages) {
+            pageNumber++;
+            loadData(pageSize, pageNumber);
+        }
+    }
+
+
+    function loadData(pageSize, pageNumber) {
+        debugger;
+        $('#page-info').text('Loading...');
+        $('#prev-page, #next-page').prop('disabled', true);
+        var query = $('#searchfield').val().trim() || '';
+        if (query !== $('#searchfield').data('lastQuery')) {
+            pageNumber = 1;
+            $('#searchfield').data('lastQuery', query);
+        }
+        debugger;
+        $.ajax({
+            type: 'GET',
+            url: '/Home/SearchFieldByPage',
+            data: { search: query, pageSize: pageSize, pageNumber: pageNumber },
+            dataType: 'json',
+            success: function (response) {
+                debugger;
+                if (response && response.data) {
+
+                    $('#pagination-container').show();
+                    $('#studentTable tbody').html("");
+                    var appStr = "";
+
+                    $.each(response.data, function (i, item) {
+                        var td = "";
+                        td += '<td>' + (i + 1) + '</td>';
+                        td += "<td>" + item.RegId + "</td>";
+                        td += "<td>" + item.FullName + "</td>";
+                        td += "<td>" + item.BookingType + "</td>";
+                        td += "<td>" + item.Country + "</td>";
+                        td += "<td>" + item.State + "</td>";
+
+                        // Format BookingDate
+                        var timestamp = parseInt(item.BookingDate.replace("/Date(", "").replace(")/", ""));
+                        var date = new Date(timestamp);
+                        var formattedDate = ("0" + date.getDate()).slice(-2) + "-" + ("0" + (date.getMonth() + 1)).slice(-2) + "-" + date.getFullYear();
+                        td += "<td>" + formattedDate + "</td>";
+
+                        td += "<td>" + (item.Status ? 'Active' : 'Inactive') + "</td>";
+                        td += "<td>" + item.Description + "</td>";
+
+                        if (item.Image != null && item.Image.length > 0) {
+                            td += "<td><img src='/ImgUpload/" + item.Image + "' height='70px' /></td>";
+                        } else {
+                            td += "<td>No Image</td>";
+                        }
+
+                        if (item.Pdf != null && item.Pdf.length > 0) {
+                            td += "<td><a href='/PdfUpload/" + item.Pdf + "' target='_blank'>View PDF</a></td>";
+                        } else {
+                            td += "<td>No PDF</td>";
+                        }
+
+                        // Format CreatedDate
+                        var timestamp1 = parseInt(item.CreatedDate.replace("/Date(", "").replace(")/", ""));
+                        var date1 = new Date(timestamp1);
+                        var formattedCreatedDate = ("0" + (date1.getMonth() + 1)).slice(-2) + "-" + ("0" + date1.getDate()).slice(-2) + "-" + date1.getFullYear();
+                        td += "<td>" + formattedCreatedDate + "</td>";
+
+                        // Format UpdatedDate
+                        var timestamp2 = parseInt(item.UpdatedDate.replace("/Date(", "").replace(")/", ""));
+                        var date2 = new Date(timestamp2);
+                        var formattedUpdatedDate = date2.getFullYear() + "-" + ("0" + (date2.getMonth() + 1)).slice(-2) + "-" + ("0" + date2.getDate()).slice(-2);
+                        td += "<td>" + formattedUpdatedDate + "</td>";
+
+                        td += '<td class="btn-group-vertical"><a onclick="getbyID(' + item.RegId + ')" data-bs-toggle="modal" data-bs-target="#addModal" class="btn btn-success">Edit</a> <a onclick="DeleteId(' + item.RegId + ')" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">Delete</a></td>';
+
+                        // Add checkbox column
+                        appStr += "<tr>" + td + "</tr>";
+                    });
+
+                    $('#studentTable tbody').html(appStr);
+
+                    // Update page info
+                    var totalPages = response.totalPages;
+                    var totalRecords = response.totalRecords;
+                    $('#page-info').text('Page ' + pageNumber + ' of ' + totalPages + ' (Total Records: ' + totalRecords + ')').data('totalPages', totalPages);
+
+
+                    // Enable/disable pagination buttons
+                    $('#prev-page').prop('disabled', pageNumber <= 1);
+                    $('#next-page').prop('disabled', pageNumber >= totalPages);
+
+                    // Update pagination
+                    updatePagination(pageNumber, totalPages);
+
+                } else {
+                    console.error("Data format error or no data returned.", response);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log("AJAX Error: " + status, error);
+
+            }
+        });
+    }
+    function updatePagination(pageNumber, totalPages) {
+        var paginationHTML = '';
+        var maxPagesToShow = 10;
+
+        paginationHTML += '<li class="page-item ' + (pageNumber == 1 ? 'disabled' : '') + '"><a class="page-link link-dark" role="button" data-page="1">First</a></li>';
+        paginationHTML += '<li class="page-item ' + (pageNumber == 1 ? 'd-none' : '') + '"><a class="page-link link-dark" role="button" data-page="' + (pageNumber - 1) + '">Previous</a></li>';
+
+        if (totalPages <= maxPagesToShow) {
+            // Show all pages if totalPages is less than or equal to maxPagesToShow
+            for (var i = 1; i <= totalPages; i++) {
+                paginationHTML += '<li class="page-item ' + (i == pageNumber ? 'active' : '') + '"><a class="page-link" role="button" data-page="' + i + '">' + i + '</a></li>';
+            }
+        } else {
+            // Show the first two pages
+            for (var i = 1; i <= 2; i++) {
+                paginationHTML += '<li class="page-item ' + (i == pageNumber ? 'active' : '') + '"><a class="page-link" role="button" data-page="' + i + '">' + i + '</a></li>';
+            }
+
+            if (pageNumber > 5) {
+                paginationHTML += '<li class="page-item"><span class="page-link">...</span></li>';
+            }
+
+            // Show three pages before the current page, the current page, and three pages after the current page
+            var startPage = Math.max(3, pageNumber - 2);
+            var endPage = Math.min(totalPages - 2, pageNumber + 3);
+            for (var i = startPage; i <= endPage; i++) {
+                paginationHTML += '<li class="page-item ' + (i == pageNumber ? 'active' : '') + '"><a class="page-link" role="button" data-page="' + i + '">' + i + '</a></li>';
+            }
+
+            if (pageNumber < totalPages - 4) {
+                paginationHTML += '<li class="page-item"><span class="page-link">...</span></li>';
+            }
+
+            // Show the last two pages
+            for (var i = totalPages - 1; i <= totalPages; i++) {
+                paginationHTML += '<li class="page-item ' + (i == pageNumber ? 'active' : '') + '"><a class="page-link" role="button" data-page="' + i + '">' + i + '</a></li>';
+            }
+        }
+
+        paginationHTML += '<li class="page-item ' + (pageNumber == totalPages ? 'd-none' : '') + '"><a class="page-link link-dark" role="button" data-page="' + (pageNumber + 1) + '">Next</a></li>';
+        paginationHTML += '<li class="page-item ' + (pageNumber == totalPages ? 'disabled' : '') + '"><a class="page-link link-dark" role="button" data-page="' + totalPages + '">Last</a></li>';
+
+        $('#pagination-container .pagination').html(paginationHTML);
+    }
+
+
+
+    $(document).on('click', '.page-link', function (e) {
+        e.preventDefault();
+        var page = $(this).data('page');
+        if (page) {
+            pageNumber = page; // Update pageNumber here
+            loadData(pageSize, pageNumber);
+        }
+    });
+
+
+
+
+
+    function AddStudent() {
+
+
+        var FullName = $('#FullName').val();
+
+        var BookingType;
+        if (document.getElementById('Obc').checked == true) {
+            BookingType = document.getElementById('Obc').value;
+        }
+        else if (document.getElementById('General').checked == true) {
+            BookingType = document.getElementById('General').value;
+        }
+
+        var Country = $('#country').val();
+        var State = $('#state').val();
+        var BookingDate = $('#BookingDate').val();
+        var Status = $('#Status').is(':checked');
+        var Description = $('#Description').val();
+        var Image = $('#Image')[0].files[0];
+        var Pdf = $('#Pdf')[0].files[0];
+        var validImageTypes = ['image/jpeg', 'image/png'];
+        var validPdfTypes = ['application/pdf'];
+        var imageValid = true;
+        var pdfValid = true;
+
+        if (Image && !validImageTypes.includes(Image.type)) {
+            alert('Invalid image file type. Only JPG, PNG, and JPEG are allowed.');
+            imageValid = false;
+        }
+
+        if (Pdf && !validPdfTypes.includes(Pdf.type)) {
+            alert('Invalid PDF file type. Only PDF files are allowed.');
+            pdfValid = false;
+        }
+        // Runtime validation
+        //var isValid = true;
+
+
+
+        if (FullName.length <= 0 || BookingDate.length <= 0 || Country.length == 0 || Image == null /*|| Pdf == null ||!$('input[name="BookingType"]:checked').val()*/) {
+            debugger;
+            if (FullName.length <= "") {
+                $('#fullName').removeClass("visually-hidden");
+            }
+
+            if (BookingDate.length <= 0) {
+                $('#bookingsdate').removeClass("visually-hidden");
+            }
+            //if (Description.length <= 0) {
+            //    $('#deescription').removeClass("visually-hidden");
+            //}
+            if (Country.length == 0) {
+                $('#categoryss').removeClass("visually-hidden");
+            }
+            //if (State.length == 0) {
+            //    $('#subcategoryss').removeClass("visually-hidden");
+            //}
+            if (Image == null) {
+                $('#images').text("Please Insert an Image").removeClass("visually-hidden");
+            }
+            //if (Pdf == null) {
+            //    $('#pdfs').text("Please Insert an Pdf").removeClass("visually-hidden");
+            //}
+            //if (!$('input[name="BookingType"]:checked').val()) {
+            //    $('#bookingtypess').removeClass("visually-hidden");
+            //}
+        }
+        else if (imageValid && pdfValid) {
+
+
+
+            //
+
+            var formData = new FormData();
+            formData.append("FullName", FullName);
+            formData.append("BookingType", BookingType);
+            formData.append("Country", Country);
+            formData.append("State", State);
+            formData.append("BookingDate", BookingDate);
+            formData.append("Status", Status);
+            formData.append("Description", Description);
+            if (Image !== undefined) {
+                formData.append("Image", Image);
+            }
+            if (Pdf !== undefined) {
+                formData.append("Pdf", Pdf);
+            }
+            $.ajax({
+                url: '/Home/Checkunique?FullName=' + FullName + "&BookingDate=" + BookingDate + "&BookingType=" + BookingType,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    debugger;
+                    if (response == "1") {
+                        alert("Please enter different Full Name, Booking Date  and Booking Type.")
+                    }
+                    else {
+
+
+
+                        $.ajax({
+                            url: "/Home/Create",
+                            data: formData,
+                            type: "POST",
+                            contentType: false,
+                            processData: false,
+                            success: function (result) {
+                                debugger;
+                                //loadData(pageSize, pageNumber);
+                                $('#Closed').click();
+                                loadData(pageSize, pageNumber);
+                                setTimeout(function () {
+                                    // Fade out the success message
+                                    $('#insertMessage .alert').fadeOut(500, function () {
+                                        // Remove the message after it has faded out
+                                        $(this).remove();
+                                    });
+                                }, 2000);
+                                $('#insertMessage').html('<div class="alert alert-success alert-dismissible"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><strong>Success!</strong></div>');
+
+                            },
+                            error: function (errormessage) {
+                                debugger;
+                                alert("error");
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+    }
+
+
+    //                    -----------------------GET ID----------------------------
+
+    function getbyID(RegId) {
+        clearTextBox();
+        $('#getbyID').val(RegId);
+        $('#btnUpdate').show();
+        $('#btnAdd').hide();
+        $('#imagePreview').show();
+        $('#pdfPreview').show();
+        $('#PdfRMbtn').show();
+        $('#ImgRMbtn').show();
+        $('#Image').val('');
+        $('#Pdf').val('');
+
+        $.ajax({
+            url: "/Home/Edit1/" + RegId,
+            type: "GET",
+            //contentType: "application/json;charset=UTF-8",
+            datatype: "json",
+            success: function (result) {
+                $('#RegId').val(result.RegId);
+                $('#FullName').val(result.FullName);
+                $('#BookingType').val(result.BookingType);
+                if (result.BookingType == "Obc") {
+                    document.getElementById("Obc").checked = true;
+                    document.getElementById("Obc").value = result.BookingType;
+                }
+                if (result.BookingType == "General") {
+                    document.getElementById("General").checked = true;
+                    document.getElementById("General").value = result.BookingType;
+                }
+                $('#country').val(result.Country);
+                $('#state').val(result.State);
+                var BookingDate = new Date(parseInt(result.BookingDate.substr(6)));
+                BookingDate.setDate(BookingDate.getDate() + 1);
+                var formattedBookingDate = BookingDate.toISOString().split('T')[0];
+                $('#BookingDate').val(formattedBookingDate);
+                if (result.Status) {
+                    $('#Status').prop('checked', true);
+                } else {
+                    $('#Status').prop('checked', false);
+                }
+                $('#Description').val(result.Description);
+                var imageElement = $('<img>').attr('src', "/ImgUpload/" + result.Image).attr('height', '70px').attr('id', 'editImgFild');
+
+                if (result.Image) {
+                    $('#imagePreview').html(imageElement);
+                }
+                else {
+                    $('#ImgRMbtn').hide();
+                    $('#imagePreview').hide();
+
+                }
+                //console.log(response.Image);
+
+                var pdfElement = $('<a>').attr('href', "/PdfUpload/" + result.Pdf).attr('target', '_blank').text('Pdf').attr('id', 'editPdfFild');
+                if (result.Pdf) {
+
+                    $('#pdfPreview').html(pdfElement);
+                }
+                else {
+                    $('#PdfRMbtn').hide();
+                    $('#pdfPreview').hide();
+
+                };
+
+            },
+            error: function (errormessage) {
+                alert(errormessage.error);
+            }
+        });
+
+    }
+
+
+    //                    -----------------------UPDATE----------------------------
+
+    function UpdateStudent(RegId) {
+        debugger;
+        $('#addModal').modal('show');
+        var id = $('#getbyID').val();
+
+        var RegId = $('#RegId').val();
+        var FullName = $('#FullName').val();
+        var BookingType;
+        if (document.getElementById('Obc').checked == true) {
+            BookingType = document.getElementById('Obc').value;
+        }
+        else if (document.getElementById('General').checked == true) {
+            BookingType = document.getElementById('General').value;
+        }
+        var Country = $('#country').val();
+        var State = $('#state').val();
+        var BookingDate = $('#BookingDate').val();
+        var Status = $("#Status").is(":checked");
+
+        var Description = $('#Description').val();
+        var Image = document.getElementById("Image").files[0];
+        var Pdf = document.getElementById("Pdf").files[0];
+        //var Image = $('#Image')[0].files[0];
+        //var Pdf = $('#Pdf')[0].files[0];
+
+        // Runtime validation
+        //var isValid = true;
+
+        if (FullName.length <= 0 || BookingDate.length <= 0 || Country.length == 0) {
+            debugger;
+            if (FullName.length == "") {
+                $('#fullName').removeClass("visually-hidden");
+            }
+            if (BookingDate.length <= 0) {
+                $('#bookingsdate').removeClass("visually-hidden");
+            }
+
+            if (Country.length == 0) {
+                $('#categoryss').removeClass("visually-hidden");
+            }
+
+
+        }
+
+        else {
+
+
+            var formData = new FormData();
+            formData.append("RegId", RegId);
+            formData.append("FullName", FullName);
+            formData.append("BookingType", BookingType);
+            formData.append("Country", Country);
+            formData.append("State", State);
+            formData.append("BookingDate", BookingDate);
+            formData.append("Status", Status);
+            formData.append("Description", Description);
+            formData.append("Image", Image);
+            formData.append("Pdf", Pdf);
+            if (Image !== undefined) {
+                formData.append('Image', Image);
+            }
+            if (Pdf !== undefined) {
+                formData.append('Pdf', Pdf);
+            }
+            $.ajax({
+                url: "/Home/Edit/" + id,
+                data: formData,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    //loadData(pageSize, pageNumber);
+
+
+                    $('#Closed').click();
+                    loadData(pageSize, pageNumber);
+                    setTimeout(function () {
+                        // Fade out the success message
+                        $('#editMessage .alert').fadeOut(500, function () {
+                            // Remove the message after it has faded out
+                            $(this).remove();
+                        });
+                    }, 1000);
+                    $('#editMessage').html('<div class="alert alert-success alert-dismissible"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><strong>Success!</strong></div>');
+
+                },
+                error: function (errormessage) {
+                    alert("error");
+                }
+            });
+        }
+    }
+
+    //                    -----------------------DELETE----------------------------
+
+    function DeleteId(id) {
+        $('#getbyID').val(id);
+    }
+
+    function DeleteStudent() {
+        var id = $('#getbyID').val();
+        $.ajax({
+            url: "/Home/Delete",
+            type: 'POST',
+            data: { id: id },
+            dataType: 'json',
+            success: function (data) {
+                loadData(pageSize, pageNumber);
+                $('#deleteModal').modal('hide');
+                $('body').removeClass('modal-open'); // Remove the class from body
+                $('.modal-backdrop').remove(); // Remove the backdrop
+                setTimeout(function () {
+                    // Fade out the success message
+                    $('#deleteMessage .alert').fadeOut(500, function () {
+                        // Remove the message after it has faded out
+                        $(this).remove();
+                    });
+                }, 1000);
+                $('#deleteMessage').html('<div class="alert alert-success alert-dismissible"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><strong>Success!</strong> </div>');
+
+            },
+            error: function (data) {
+                alert("error in code");
+            }
+
+        })
+    }
+    //                    -----------------------CLEARING TEXTBOX----------------------------
+
+    function clearTextBox() {
+        $('#FullName').val("");
+        document.getElementById('Obc').checked = false;
+        document.getElementById('General').checked = false;
+        $('#country').val("");
+        $('#state').val("");
+        $('#BookingDate').val("");
+        document.getElementById('Status').checked = false;
+        $('#Description').val("");
+        $('#Image').val("");
+        $('#Pdf').val("");
+        $('#btnUpdate').hide();
+        $('#btnAdd').show();
+        $('#PdfRMbtn').hide();
+        $('#ImgRMbtn').hide();
+        $('#imagePreview').hide();
+        $('#pdfPreview').hide();
+        $('state').val('Please select subcategory');
+        $("#fullName").addClass("visually-hidden");
+        $("#categoryss").addClass("visually-hidden");
+        $("#bookingsdate").addClass("visually-hidden");
+        $("#images").addClass("visually-hidden");
+        document.getElementById("UploadField").value = "";
+
+        // Hide any validation messages
+        document.getElementById("excelSpan").classList.add("visually-hidden");
+        $.ajax({
+            url: '/Home/Create',
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                var md = data.States;
+                var State = $('#state');
+                State.prop('disabled', true);
+                State.empty();
+                State.append($('<option>').text('- Select SubCategory -').attr('value', ''));
+                $.each(md, function (index, stateName) {
+                    State.append($('<option>').text(stateName.Sname).attr('value', stateName.Sid).attr('data-country', stateName.Counid));
+                    //console.log(State);
+                });
+            },
+            error: function () {
+                alert('Error loading State.');
+            }
+        });
+
+
+
+    }
+
+
+
+    //  -----------------------DEL IMG----------------------------
+    function DELIMG(id) {
+        var id = $('#getbyID').val();
+        debugger;
+        $.ajax({
+            url: "/Home/DELIMG?id=" + id,
+            type: 'GET',
+            data: { RegId: id },
+            dataType: 'json',
+            success: function (data) {
+                debugger;
+                $('#imagePreview').hide();
+                $('#ImgRMbtn').hide();
+            },
+            error: function (data) {
+                alert("error in code");
+            }
+
+        })
+    }
+    //                    -----------------------DEL PDF----------------------------
+    function DELPDF(id) {
+        var id = $('#getbyID').val();
+        $.ajax({
+            url: "/Home/DELPDF?id=" + id,
+            type: 'GET',
+            data: { RegId: id },
+            dataType: 'json',
+            success: function (data) {
+                $('#pdfPreview').hide();
+                $('#PdfRMbtn').hide();
+            },
+            error: function (data) {
+                alert("error in code");
+            }
+
+        })
+    }
+
+    //-------------------------------------------validation------------------------------------
+    function validationFieldOnChangeFullName() {
+        var FullName = $('#FullName').val();
+        if (FullName.length > 0) {
+            $("#fullName").addClass("visually-hidden")
+        
+        }
+        else {
+            $("#fullName").removeClass("visually-hidden");
+           
+        }
+    }
+    function validateBookingType() {
+        // Check if either radio button is checked
+        if ($('#Obc').is(':checked') || $('#General').is(':checked')) {
+            $('#bookingtypess').addClass("visually-hidden"); // Hide error message
+        } else {
+            $('#bookingtypess').removeClass("visually-hidden"); // Show error message
+        }
+    }
+    function validationFieldOnChangeBookingDate() {
+        var BookingDate = $('#BookingDate').val();
+        if (BookingDate.length > 0) {
+            $("#bookingsdate").addClass("visually-hidden")
+            //console.log("if Execute FullName");
+        }
+        else {
+            $("#bookingsdate").removeClass("visually-hidden");
+            //console.log("else Execute FullName");
+        }
+    }
+    function validationFieldOnChangeDescription() {
+        var Description = $('#Description').val();
+        if (Description.length > 0) {
+            $("#deescription").addClass("visually-hidden")
+            //console.log("if Execute FullName");
+        }
+        else {
+            $("#deescription").removeClass("visually-hidden");
+            //console.log("else Execute FullName");
+        }
+    }
+    function validationFieldOnChangeCategory() {
+        var country = $('#country').val();
+        if (country.length > 0) {
+            $("#categoryss").addClass("visually-hidden")
+            //console.log("if Execute FullName");
+        }
+        else {
+            $("#categoryss").removeClass("visually-hidden");
+            //console.log("else Execute FullName");
+        }
+    }
+    function validationFieldOnChangeSubCategory() {
+        var state = $('#state').val();
+        if (state.length > 0) {
+            $("#subcategoryss").addClass("visually-hidden")
+            //console.log("if Execute FullName");
+        }
+        else {
+            $("#subcategoryss").removeClass("visually-hidden");
+            //console.log("else Execute FullName");
+        }
+    }
+    function validationFieldOnChangeImage() {
+        var Image = $('#Image').val();
+        if (Image.length > 0) {
+            $("#images").addClass("visually-hidden")
+            //console.log("if Execute FullName");
+        }
+        else {
+            $("#images").removeClass("visually-hidden");
+            //console.log("else Execute FullName");
+        }
+    }
+    function validationFieldOnChangePdf() {
+        var Pdf = $('#Pdf').val();
+        if (Pdf.length > 0) {
+            $("#pdfs").addClass("visually-hidden")
+            //console.log("if Execute FullName");
+        }
+        else {
+            $("#pdfs").removeClass("visually-hidden");
+            //console.log("else Execute FullName");
+        }
+    }
+
+
+
+
+
+
+
+    $(document).ready(function () {
+        $('#exportButton').click(function () {
+            var selectedFormat = $('input[name="exportFormat"]:checked').val();
+
+            if (selectedFormat === 'excel') {
+                exportToExcel();
+            } else if (selectedFormat === 'csv') {
+                exportToCsv();
+            }
+        });
+    });
+
+    function exportToExcel() {
+        $.ajax({
+            type: "GET",
+            url: '/Home/ExportToExcel/',
+            xhrFields: {
+                responseType: 'arraybuffer'
+            },
+            success: function (response) {
+                var blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                var downloadUrl = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = downloadUrl;
+                a.download = "Registration.xlsx";
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+    }
+
+    function exportToCsv() {
+        $.ajax({
+            type: "GET",
+            url: '/Home/ExportToCsv/',
+            xhrFields: {
+                responseType: 'arraybuffer'
+            },
+            success: function (response) {
+                var blob = new Blob([response], { type: 'text/csv' });
+                var downloadUrl = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = downloadUrl;
+                a.download = "Registration.csv";
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+        });
+    }
+
+    function uploadExcelFile() {
+        var fileInput = document.getElementById('UploadField').files[0];
+        if (fileInput == null) {
+            $("#excelSpan").removeClass("visually-hidden");
+        } else {
+            if (fileInput.name.endsWith('.xlsx')) {
+                var formData = new FormData();
+                formData.append('file', fileInput);
+                $.ajax({
+                    url: '/Home/UploadExcel',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        if (response.success == true) {
+                            $('#Close').click();
+                            loadData(pageSize, pageNumber);
+                            setTimeout(function () {
+                                $('#importMessage .alert').fadeOut(500, function () {
+                                    $(this).remove();
+                                });
+                            }, 500);
+                            $('#importMessage').html('<div class="alert alert-success alert-dismissible"><button type="button" class="btn-close" data-bs-dismiss="alert"></button><strong>Success!</strong> </div>');
+                        } else {
+                            alert(response.message);
+                        }
+                        // Clear the file input
+                        $('#UploadField').val('');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error occurred during upload:', error);
+                        alert('Error Occurred While Upload Excel File...' + xhr + status);
+                        // Clear the file input
+                        $('#UploadField').val('');
+                    }
+                });
+            } else {
+                $('#UploadField').val('');
+                alert('Please Select Excel File');
+            }
+        }
+    }
+
+
+    function importBtn() {
+        debugger;
+        $('#UploadField').val('');
+        $('#excelSpan').addClass('visually-hidden');
+    }
+
+
+</script>
+
